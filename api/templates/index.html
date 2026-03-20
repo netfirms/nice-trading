@@ -12,7 +12,11 @@
         .neon-border { border-color: rgba(16, 185, 129, 0.2); transition: all 0.3s ease; }
         .neon-border:hover { border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
         .heartbeat { animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        .pulse-active { background: #10b981; box-shadow: 0 0 8px #10b981; }
+        .pulse-error { background: #f43f5e; box-shadow: 0 0 8px #f43f5e; animation: pulse-red 1s infinite; }
+        .pulse-inactive { background: #64748b; }
         @keyframes ping { 75%, 100% { transform: scale(1.5); opacity: 0; } }
+        @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
@@ -30,7 +34,7 @@
                         </span>
                         <span class="text-[10px] font-bold text-emerald-400 tracking-widest uppercase">System Live</span>
                     </div>
-                    <button hx-post="/bots/stop-all" 
+                    <button hx-post="/bots/stop-all"
                             hx-target="#bot-list"
                             hx-confirm="ARE YOU SURE? This will stop ALL active bots immediately."
                             class="px-4 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-95">
@@ -39,9 +43,13 @@
                 </div>
                 <div id="status-badge" hx-get="/partials/status-badge" hx-trigger="load, every 5s"></div>
             </div>
-            
+
             <div id="favourites-container" hx-get="/partials/favourites" hx-trigger="load">
                 <!-- Favourites loaded here -->
+            </div>
+
+            <div id="portfolio-stats" hx-get="/partials/portfolio-stats" hx-trigger="load, every 15s" class="mt-4">
+                <!-- Global Metrics Bar -->
             </div>
         </header>
 
@@ -77,7 +85,7 @@
                 <div class="glass p-8 rounded-2xl border border-slate-800 shadow-xl min-h-[400px]">
                     <h2 class="text-2xl font-semibold mb-6 text-slate-300 flex justify-between items-center">
                         📜 Trade History
-                        <button class="text-sm bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md transition" 
+                        <button class="text-sm bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md transition"
                                 hx-get="/partials/trades" hx-target="#trade-table">
                             ↻ Refresh
                         </button>

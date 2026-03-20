@@ -9,9 +9,18 @@
             <div class="text-xs text-slate-500 uppercase tracking-tighter">{{ config.strategy }}</div>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-xs {% if config.is_active %}text-emerald-400 animate-pulse{% else %}text-rose-400{% endif %}">
-                ● {% if config.is_active %}Active{% else %}Inactive{% endif %}
-            </span>
+            <div class="flex flex-col items-end gap-1">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full pulse-{{ config.status }}"></span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest
+                                 {{ 'text-emerald-400' if config.status == 'active' else 'text-rose-400' if config.status == 'error' else 'text-slate-500' }}">
+                        {{ config.status }}
+                    </span>
+                </div>
+                {% if config.last_heartbeat %}
+                <span class="text-[8px] text-slate-500 font-mono">HB: {{ config.last_heartbeat.strftime('%H:%M:%S') }}</span>
+                {% endif %}
+            </div>
             <button class="px-3 py-1 rounded-md text-sm font-medium transition
                            {% if config.is_active %}bg-rose-500/10 text-rose-400 hover:bg-rose-500/20{% else %}bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20{% endif %}"
                     hx-post="/bots/toggle/{{ config.symbol|replace('/', '%2F') }}"

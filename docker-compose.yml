@@ -7,7 +7,10 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - api
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
     restart: always
     deploy:
       resources:
@@ -16,19 +19,21 @@ services:
     networks:
       - trading-network
 
-  # --- Storage Layer ---
-  redis:
-    image: redis:alpine
-    command: redis-server --appendonly yes
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER:-admin}
+      - POSTGRES_PASSWORD=${DB_PASS:-password}
+      - POSTGRES_DB=${DB_NAME:-trading_bot}
     volumes:
-      - redis_data:/data
+      - postgres_data:/var/lib/postgresql/data
     restart: always
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 1G
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d trading_bot"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,7 +50,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1.5G 
+          memory: 1.5G
     healthcheck:
       test: ["CMD-SHELL", "wget --spider http://localhost:9003/status || exit 1"]
       interval: 15s
@@ -58,11 +63,9 @@ services:
   api:
     build: .
     command: uvicorn api.app:app --host 0.0.0.0 --port 8000
-    volumes:
-      - sqlite_data:/app/data
     env_file: .env
     depends_on:
-      redis:
+      postgres:
         condition: service_healthy
       questdb:
         condition: service_healthy
@@ -77,10 +80,10 @@ services:
   manager:
     build: .
     command: python manager/bot_manager.py
-    volumes:
-      - sqlite_data:/app/data
     env_file: .env
     depends_on:
+      postgres:
+        condition: service_healthy
       api:
         condition: service_started
     restart: always
@@ -96,7 +99,7 @@ services:
     command: python workers/orderbook_fetcher.py
     env_file: .env
     depends_on:
-      redis:
+      postgres:
         condition: service_healthy
       questdb:
         condition: service_healthy
@@ -114,8 +117,7 @@ networks:
 
 volumes:
   questdb_data:
-  sqlite_data:
-  redis_data:
+  postgres_data:
 
 # --- Global Logging Policy ---
 logging:

@@ -1,0 +1,16 @@
+<div class="flex gap-4 items-center overflow-x-auto pb-4 no-scrollbar">
+    <div class="glass px-6 py-4 rounded-xl border border-slate-800 flex flex-col gap-1 min-w-[200px]">
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Portfolio PnL</span>
+        <span class="text-2xl font-black {{ 'text-emerald-400' if metrics.total_pnl >= 0 else 'text-rose-400' }}">
+            ${{ metrics.total_pnl }}
+        </span>
+    </div>
+    <div class="glass px-6 py-4 rounded-xl border border-slate-800 flex flex-col gap-1 min-w-[150px]">
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Fleet</span>
+        <span class="text-2xl font-black text-blue-400">{{ metrics.active_bot_count }} <span class="text-sm font-medium text-slate-600">Bots</span></span>
+    </div>
+    <div class="glass px-6 py-4 rounded-xl border border-slate-800 flex flex-col gap-1 min-w-[150px]">
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Orders</span>
+        <span class="text-2xl font-black text-slate-300">{{ metrics.trade_count }}</span>
+    </div>
+</div>

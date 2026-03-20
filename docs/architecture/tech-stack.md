@@ -10,7 +10,9 @@ The Nice Trading Platform is built using a modern, high-performance stack select
     *   `CCXT`: For exchange connectivity and order execution.
     *   `Pandas` & `NumPy`: For vectorized technical indicator calculations.
     *   `SQLAlchemy`: ORM for configuration and trade history persistence.
+    *   **PostgreSQL 18**: State-of-the-art consolidated RDBMS. Features native **UUIDv7** (for timestamp-ordered records), **JSON_TABLE** (for relational JSON analytics), and **Asynchronous I/O** for high-frequency caching.
     *   `Multiprocessing`: Parallel execution architecture for multi-bot isolation.
+    *   `Pytest`: Comprehensive unit and integration testing suite.
 
 ## ⚡ Data & Streaming
 *   **QuestDB**: High-performance time-series database for tick-level market data storage.

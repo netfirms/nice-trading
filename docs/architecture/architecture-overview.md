@@ -9,11 +9,12 @@ The system utilizes a **decentralized, multi-process architecture** orchestrated
 ### 🔹 Component Diagram (Conceptual)
 ```mermaid
 graph TD
-    A[Cockpit UI - HTMX] -->|HTTP/WS| B[FastAPI Management API]
+    A[Cockpit UI - HTMX] -->|Health & PnL| B[FastAPI Management API]
     B -->|SQLAlchemy| C[(SQLite - Config & History)]
     B -->|Subprocess| D[BotManager]
-    D -->|Spawn| E[BotRunner: BTC/USDT]
-    D -->|Spawn| F[BotRunner: ETH/USDT]
+    D -->|Spawn + Monitor| E[BotRunner: BTC/USDT]
+    D -->|Spawn + Monitor| F[BotRunner: ETH/USDT]
+    E & F -->|Heartbeat| C
     E & F -->|ILP| G[(QuestDB - Tick Data)]
     E & F -->|PubSub| H[(Redis - Orderbook Cache)]
     I[Orderbook Worker] -->|Fetch| J[Binance API]
@@ -32,17 +33,21 @@ The `orderbook-worker` continuously polls the Binance API (via CCXT) for the top
 `BotRunner` processes operate independently. They:
 1.  Fetch OHLCV historical data (QuestDB/Binance) to hydrate indicators (Pandas/NumPy).
 2.  Watch Redis for real-time price updates.
-3.  Execute trades based on strategy logic via `connectors/binance_connector.py`.
-4.  Log all analytical "thoughts" and trade actions to **QuestDB** for post-trade analysis.
+3.  Execute trades using one of the **5 standard algorithms** (Scalp, Breakout, etc.).
+4.  Log all analytical "thoughts" and trade actions to **QuestDB**.
+5.  **Heartbeat**: Every 10s, each bot updates its status in SQLite, allowing the API to monitor for "stalled" processes.
 
-### 3. Management Layer
-`BotManager` acts as the fleet admiral. It monitors the `Storage` (SQLite) for active bot configurations and ensures that a corresponding `Process` is running for every active symbol. If a bot crashes, it can be automatically restarted or alerted via Telegram.
+### 3. Management & Monitoring Layer
+The **Management API** provides:
+-   **Health Tracking**: Visual "Pulse" for each running bot.
+-   **Portfolio Analytics**: Real-time aggregation of Total PnL and Max Drawdown across the entire fleet.
+-   **Circuit Breakers**: Global "Emergency Stop" that halts all active processes immediately via SQLite status broadcast.
 
 ---
 
-## 🛡️ Security Boundaries
-*   **External Gateway**: Nginx provides rate limiting and Basic Authentication.
-*   **Internal Data**: QuestDB and Redis are bound to `127.0.0.1` or the internal Docker network, preventing direct external access.
+## 🛡️ Security & Reliability
+*   **API Resilience**: Integrated Exponential Backoff (429 handling) for all exchange interactions.
+*   **Verification**: 100% logic coverage for all strategy algorithms via `pytest`.
 *   **Isolation**: Each bot runs in its own memory space, preventing "cross-contamination" of strategy state.
 
 ---
