@@ -53,11 +53,11 @@ nice-trading/
 ---
 
 ## 📚 Documentation
-For a deep dive into the system, check our research and implementation docs:
-*   [📖 Project Walkthrough](./docs/walkthrough.md)
-*   [☁️ Lightsail Deployment Guide](./docs/research/lightsail_deployment_guide.md)
-*   [🛡️ Readiness Audit](./docs/research/readiness_audit.md)
-*   [🏗️ System Architecture Plan](./docs/implementation_plan.md)
+For a deep dive into the system, check our professional documentation:
+*   **Getting Started**: [Lightsail Deployment](./docs/getting-started/lightsail-deployment.md)
+*   **User Guide**: [User Manual](./docs/user-guide/manual.md) | [Safety Audit](./docs/user-guide/readiness-audit.md)
+*   **Architecture**: [Design Overview](./docs/architecture/implementation-plan.md) | [Component Design](./docs/architecture/low-level-design.md)
+*   **Research**: [Future Roadmap](./docs/research/future-roadmap.md) | [TSDB Research](./docs/research/database-research.md)
 
 ---
 *Created with ❤️ for quantitative excellence.*
