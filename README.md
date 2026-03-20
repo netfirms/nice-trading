@@ -54,9 +54,9 @@ nice-trading/
 
 ## 📚 Documentation
 For a deep dive into the system, check our professional documentation:
-*   **Getting Started**: [Lightsail Deployment](./docs/getting-started/lightsail-deployment.md)
+*   **Getting Started**: [Local Setup](./docs/getting-started/local-setup.md) | [Onboarding](./docs/getting-started/onboarding.md) | [Lightsail Deployment](./docs/getting-started/lightsail-deployment.md)
 *   **User Guide**: [User Manual](./docs/user-guide/manual.md) | [Safety Audit](./docs/user-guide/readiness-audit.md)
-*   **Architecture**: [Design Overview](./docs/architecture/implementation-plan.md) | [Component Design](./docs/architecture/low-level-design.md)
+*   **Architecture**: [Tech Stack](./docs/architecture/tech-stack.md) | [Design Overview](./docs/architecture/implementation-plan.md) | [Component Design](./docs/architecture/low-level-design.md)
 *   **Research**: [Future Roadmap](./docs/research/future-roadmap.md) | [TSDB Research](./docs/research/database-research.md)
 
 ---
