@@ -1,62 +1,65 @@
-# Project Walkthrough: Nice Trading Platform (Phase 2)
+# 📘 User Manual: Nice Trading Platform
 
-I've successfully transformed the initial prototype into a high-performance, institutional-grade multi-bot trading platform.
+Welcome to your private trading fleet. This document provides a solid overview of how to operate and maintain your institutional-grade trading robot.
 
-## 🚀 Key Accomplishments
+## 🕹️ The Trading Cockpit (Dashboard)
 
-### 1. Multi-Bot Architecture
-*   **Modular BotManager**: Orchestrates multiple independent bot processes, each running a unique symbol/strategy.
-*   **Process Isolation**: Each bot runs in its own process to ensure that a failure in one bot doesn't crash the entire fleet.
-*   **Dynamic Lifecycle**: Start, stop, and configure bots in real-time via the management dashboard.
+The dashboard is your central mission control, built with low-latency HTMX.
 
-### 2. Monitoring & Visualization
-*   **Real-Time Dashboard**: Built with **FastAPI**, **HTMX**, and **Tailwind CSS** for a reactive, low-latency UI.
-*   **WebSockets**: Bidirectional price and log streaming for zero-latency updates.
-*   **Advanced Charting**: Integrated **Lightweight Charts** with real historical OHLCV data and visual trade signals.
-*   **System Heartbeats**: Visual health markers for all core services (Database, Manager, API).
+### 🔹 Bot Management
+*   **System Badge**: Shows the "Live" heartbeat of the manager. If it turns grey, check the `manager` container logs.
+*   **Emergency Stop**: The red button on the top right stops all active processes and resets the database state to `inactive`.
+*   **Add Bot**: Use the input to add a new symbol (e.g., `BTC/USDT`) and select a strategy.
 
-### 3. Data & Storage
-*   **QuestDB Integration**: High-speed time-series storage for every market tick.
-*   **Redis Caching**: Ultra-low latency orderbook storage.
-*   **SQLite Persistence**: Reliable storage for bot configurations, asset favorites, and trade history.
+### 🔹 Real-Time Charting
+*   **Signal Markers**: When a bot detects an EMA Crossover or RSI signal, a marker appears directly on the chart (Arrow Up/Down).
+*   **Live Price**: The price displayed in the bot list is streamed via WebSockets from the `orderbook-worker`.
 
-### 4. Enterprise Safety & Reliability
-*   **Live Balance Sync**: Integrated exchange balance fetching into the position sizing logic.
-*   **Exchange-Side Safety (TP/SL)**: Orders are placed as Limit-Stop orders directly on Binance for crash-resistance.
-*   **Global Circuit Breaker**: Emergency "Stop All" functionality in the API and Dashboard to halt all bots instantly.
-*   **Drawdown Protection**: Automated monitoring in `RiskManager` to prevent catastrophic losses.
+---
 
-### 5. Analytics & Optimization
-*   **Vectorized Indicators**: Technical indicators (RSI, MACD, Bollinger Bands) optimized with **NumPy/Pandas**.
-*   **Grid Search Optimizer**: Automated parameter testing to find the most profitable strategy settings.
+## 🛡️ Safety & Risk Controls
 
-## 📁 Project Structure
+The platform is designed to protect your capital above all else.
 
-```text
-nice-trading/
-├── api/                   # FastAPI Web Dashboard
-├── manager/               # Multi-bot orchestration
-├── engine/                # Trading & Analytics logic
-├── connectors/            # Exchange (Binance/CCXT) connectors
-├── storage/               # DB (QuestDB, Redis, SQLite) interfaces
-├── utils/                 # Alerting and decorators
-├── docs/                  # Technical documentation
-└── docker-compose.yml     # Full platform orchestration
+### ⚡ Exchange-Side Exit
+Our system doesn't just watch prices locally. When a trade is executed:
+1.  An **Entry Order** is placed on Binance.
+2.  A **Stop-Loss Limit** order is immediately placed on Binance.
+This ensures that even if our server loses power, your exit strategy is already "In the exchange's hands."
+
+### 🛑 Circuit Breaker
+Every `RiskManager` instance calculates the current drawdown relative to your "Initial Day Balance." If we hit **-5%**, the bot will refuse to take new signals and alert you via Telegram.
+
+---
+
+## ⚙️ Advanced Configuration
+
+### `config.yaml`
+Fine-tune global parameters:
+*   `log_level`: Default is `INFO`. Switch to `DEBUG` for deep troubleshooting.
+*   `max_retries`: Number of times to retry a failed CCXT call.
+
+### `.env`
+Sensitive secrets:
+*   `BINANCE_API_KEY`: Required for live trading.
+*   `TELEGRAM_BOT_TOKEN`: Enable this for mobile push alerts.
+*   `DASHBOARD_PASS`: Secure your web access.
+
+---
+
+## 🛠️ Maintenance & Troubleshooting
+
+### Viewing Logs
+To see what a specific bot is thinking:
+```bash
+docker logs --tail 50 -f nice-trading-manager-1
 ```
 
-## 🛠️ How to Launch
+### Resetting Data
+To clear QuestDB and start fresh:
+```bash
+docker-compose down -v
+```
 
-1.  **Configure Environment**:
-    ```bash
-    cp .env.example .env
-    # Add your BINANCE_API_KEY and DASHBOARD_PASS
-    ```
-2.  **Start the Fleet**:
-    ```bash
-    docker-compose up --build -d
-    ```
-3.  **Access the Cockpit**:
-    Navigate to `http://localhost:8000` (Default: admin / password).
-
-## 📊 Roadmap Status
-All identified gaps have been implemented, including security, data hydration, and real-world execution reliability. The platform is now ready for "Dry Run" or "Live" deployment with real capital.
+---
+*Disclaimer: Trading involves risk. Ensure you have tested your strategies in DRY RUN mode before deploying real capital.*

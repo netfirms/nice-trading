@@ -129,3 +129,8 @@
     - [x] Create deploy.sh for local packaging and SCP <!-- id: 128 -->
     - [x] Create setup_lightsail.sh for VM initialization <!-- id: 129 -->
     - [x] Update documentation with one-click deployment guide <!-- id: 130 -->
+- [/] Phase 32: Documentation Polish & Consolidation <!-- id: 131 -->
+    - [ ] Refine README.md with professional overview <!-- id: 132 -->
+    - [ ] Update walkthrough.md to User Manual style <!-- id: 133 -->
+    - [ ] Harden Lightsail Deployment Guide with SSH/SSL details <!-- id: 134 -->
+    - [ ] Final sync of all documentation to repository <!-- id: 135 -->

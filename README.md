@@ -1,35 +1,63 @@
-# Nice Trading Platform 🚀
+# 🤖 Nice Trading Platform: Institutional-Grade Multi-Bot Suite
 
-A professional, multi-bot, event-driven trading platform built for high-performance crypto trading on Binance.
+A high-performance, private trading ecosystem designed for algorithmic execution, real-time monitoring, and institutional safety. Built on Python, QuestDB, Redis, and HTMX.
 
-## Key Features
--   **Multi-Bot Management**: Run multiple strategies and assets simultaneously.
--   **High-Performance Cache**: Redis-backed L2 orderbook for sub-millisecond price access.
--   **Time-Series Storage**: QuestDB for high-speed tick ingestion and OHLCV analytics.
--   **Simple Web Dashboard**: Lightweight HTMX + FastAPI UI with integrated TradingView charts.
--   **Fully Containerized**: Orchestrated with Docker Compose for easy deployment.
+---
 
-## Documentation 📖
-All technical documentation is located in the [docs/](docs/) directory:
--   **[Implementation Plan](docs/implementation_plan.md)**: Current roadmap and feature progress.
--   **[Architecture (High-Level)](docs/architecture/high_level.md)**: System overview and external connections.
--   **[Architecture (Low-Level)](docs/architecture/low_level.md)**: Component interactions and process management.
--   **[Walkthrough](docs/walkthrough.md)**: Step-by-step guide to running the platform.
--   **[Research](docs/research/)**: Deep dives into time-series databases and advanced trading stacks.
--   **[Gap Analysis](docs/gap_analysis.md)**: Product requirement tracking.
+## 🚀 Key Features
 
-## Getting Started 🛠️
+### 🏢 Multi-Bot Orchestration
+*   **Isolated Execution**: Each bot runs in its own process, ensuring that a single symbol's failure doesn't affect the fleet.
+*   **Dynamic Management**: Start, stop, and configure strategies (SMA, MACD, Advanced) for any symbol in seconds.
+*   **Asset Favorites**: Keep your preferred tickers pinned to the top of your cockpit.
 
-1.  **Configure Environment**:
-    Create a `.env` file based on `.env.example` with your Binance API keys.
+### 📊 High-Performance Data Layer
+*   **QuestDB Time-Series**: Microsecond-level tick ingestion for every symbol.
+*   **Redis Cache**: Ultra-low latency orderbook storage for high-frequency signal generation.
+*   **Lightweight Charts**: Professional-grade charting with real-time WebSocket updates and signal markers (Buy/Sell).
 
-2.  **Start Services**:
-    ```bash
-    docker-compose up --build -d
-    ```
+### 🛡️ Institutional-Grade Safety
+*   **Live Balance Sync**: Real-time position sizing based on live Binance capital.
+*   **Exchange-Side Safety (TP/SL)**: Orders are persisted directly on the exchange for crash-resistance.
+*   **Global Circuit Breaker**: Automated and manual "Kill Switches" to stop everything during extreme volatility.
+*   **Basic Auth Security**: Password-protected dashboard and API.
 
-3.  **Access Dashboard**:
-    Visit `http://localhost:8000` to manage your bots.
+---
 
-4.  **View Data**:
-    Visit `http://localhost:9000` for the QuestDB Web Console.
+## 📁 System Architecture
+
+```text
+nice-trading/
+├── api/                   # HTMX/FastAPI Web Dashboard
+├── manager/               # Multi-bot Management & Execution
+├── engine/                # Vectorized Indicators & Strategy Logic
+├── connectors/            # CCXT Wrapper for Exchange Connectivity
+├── storage/               # QuestDB, Redis, & SQLite Data Persistence
+├── nginx/                 # Production Reverse Proxy Gateway
+└── docs/                  # Detailed Technical Documentation
+```
+
+---
+
+## 🛠️ Quick Start
+
+### 1. Local Environment (Docker)
+1.  Configure your environment: `cp .env.example .env` (Add your Binance Keys).
+2.  Launch the fleet: `docker-compose up --build -d`.
+3.  Monitor the Cockpit: `http://localhost:80` (Default: admin / password).
+
+### 2. Remote Deployment (AWS Lightsail)
+1.  Setup your VM: `/bin/bash setup_lightsail.sh`.
+2.  Deploy from local: `./deploy.sh [VM_IP] [SSH_KEY_PATH]`.
+
+---
+
+## 📚 Documentation
+For a deep dive into the system, check our research and implementation docs:
+*   [📖 Project Walkthrough](./docs/walkthrough.md)
+*   [☁️ Lightsail Deployment Guide](./docs/research/lightsail_deployment_guide.md)
+*   [🛡️ Readiness Audit](./docs/research/readiness_audit.md)
+*   [🏗️ System Architecture Plan](./docs/implementation_plan.md)
+
+---
+*Created with ❤️ for quantitative excellence.*

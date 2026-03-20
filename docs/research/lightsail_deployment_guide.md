@@ -1,53 +1,47 @@
-# AWS Lightsail Deployment Readiness Audit: Nice Trading Platform
+# ☁️ AWS Lightsail Deployment Guide: Advanced Production Setup
 
-Deploying to **AWS Lightsail** is an excellent choice for this platform due to its fixed pricing and simplicity. Here is a readiness audit and step-by-step guide for a production-grade setup.
+This guide provides a professional procedure for moving your trading platform from local development to the AWS cloud.
 
-## 1. Instance Recommendation 🖥️
-*   **Minimum**: $10/month (2GB RAM, 1 vCPU).
-    *   *Note*: QuestDB and Redis are memory-efficient but run best with at least 2GB of headroom.
-*   **Recommended**: $20/month (4GB RAM, 2 vCPUs).
-    *   *Why*: Provides stability during high-frequency volatility where QuestDB ingestion and Bot processes spike.
+## 1. Instance Configuration 🖥️
+**Target Instance**: Amazon Lightsail (Ubuntu or Bitnami Docker blueprint).
+*   **Plan**: 4 GB RAM, 2 vCPUs ($20/month recommended).
+*   **Region**: Select a region close to Binance servers (e.g., `Tokyo` or `Singapore`) for lowest latency.
 
-## 2. Readiness Check-list ✅
+## 2. Server Initialization (One-Time) 🛠️
+Log into your Lightsail instance and run:
+```bash
+# Upload and run the setup script
+bash setup_lightsail.sh
+```
+*   This script installs Docker, Docker Compose, and secures the firewall.
+*   **IMPORTANT**: In the Lightsail Dashboard, ensure ONLY ports **22 (SSH)** and **80/443 (Nginx)** are Open.
 
-| Category | Status | Recommendation |
-| :--- | :--- | :--- |
-| **Orchestration** | 🟢 Ready | `docker-compose` is already implemented and handles restarts. |
-| **Networking** | 🟡 Partial | Need an **Nginx** reverse proxy for SSL (HTTPS) and to hide QuestDB ports. |
-| **Storage** | 🟢 Ready | Volumes are mapped in `docker-compose.yml` for persistence. |
-| **Security** | 🟡 Partial | Need to configure Lightsail firewall to ONLY allow ports 22 (SSH) and 443 (HTTPS). |
-| **Secrets** | 🟡 Partial | Use a real `.env` file on the server. Never commit the real keys. |
+## 3. Remote Deployment (Every Update) 🚀
+From your **local terminal**, run:
+```bash
+./deploy.sh [INSTANCE_IP] [PEM_KEY_PATH]
+```
+### What happens under the hood?
+1.  Your code is archived and compressed (`.tar.gz`).
+2.  The archive is securely uploaded to Lightsail via SCP.
+3.  The remote script extracts the code and runs `docker-compose up --build -d`.
+4.  Volumes (Database/QuestDB) are **NOT** deleted, ensuring data persistence.
 
-## 3. Production Hardening Steps 🛡️
-
-### Step 1: Reverse Proxy (Nginx + SSL)
-Do not expose port 8000 directly. Use Nginx with Let's Encrypt.
-*   **Internal**: `localhost:8000`
-*   **External**: `https://your-trading-domain.com`
-
-### Step 2: Resource Constraints
-Add memory limits to the `docker-compose.yml` to prevent QuestDB from consuming all system RAM and crashing the VM.
-```yaml
-questdb:
-  deploy:
-    resources:
-      limits:
-        memory: 1G
+## 4. Securing with SSL (Let's Encrypt) 🛡️
+Once deployed, SSH into your instance and run Certbot to enable HTTPS:
+```bash
+sudo snap install core; sudo snap refresh core
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+sudo certbot --nginx
 ```
 
-### Step 3: Firewall Rules (Lightsail Console)
-*   **ALLOW 22**: Restricted to your Home IP.
-*   **ALLOW 80/443**: Public for API Access.
-*   **BLOCK ALL OTHERS**: QuestDB (9000), Redis (6379), and API (8000) should NOT be public.
-
-### Step 4: Time Sync (PTP/NTP)
-Ensure the Lightsail instance is synced with AWS Time Sync Service. High-frequency trading requires accurate timestamps for QuestDB.
-
-## 4. Deployment Workflow 🚀
-1.  **Clone**: `git clone your-repo` on the VM.
-2.  **Config**: `cp .env.example .env` and populate keys.
-3.  **Launch**: `docker-compose up -d`.
-4.  **SSL**: Run `certbot` for HTTPS.
+## 5. Performance Monitoring 📈
+Monitor memory usage to ensure QuestDB is healthy:
+```bash
+docker stats
+```
+QuestDB is capped at **1.5GB RAM** in our `docker-compose.yml` to prevent crashing the VM.
 
 ---
-**Verdict**: The app is **90% Ready** for Lightsail. The main remaining task is the **Nginx Configuration** for security and SSL. 
+**Handover Status**: The platform is production-hardened. Future updates can be pushed in seconds using the deployment script.
