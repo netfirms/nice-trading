@@ -96,7 +96,7 @@ services:
 
   orderbook-worker:
     build: .
-    command: python workers/orderbook_fetcher.py
+    command: ./orderbook-worker-go
     env_file: .env
     depends_on:
       postgres:
