@@ -17,6 +17,7 @@ A high-performance, private trading ecosystem designed for algorithmic execution
 *   **Lightweight Charts**: Professional-grade charting with real-time WebSocket updates and signal markers (Buy/Sell).
 
 ### 🛡️ Institutional-Grade Safety
+*   **Pydantic Settings**: Centralized, validated configuration for API keys and host settings.
 *   **Live Balance Sync**: Real-time position sizing based on live Binance capital.
 *   **Exchange-Side Safety (TP/SL)**: Orders are persisted directly on the exchange for crash-resistance.
 *   **Global Circuit Breaker**: Automated and manual "Kill Switches" to stop everything during extreme volatility.

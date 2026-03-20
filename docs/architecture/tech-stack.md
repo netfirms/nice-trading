@@ -5,6 +5,8 @@ The Nice Trading Platform is built using a modern, high-performance stack select
 ## 🐍 Backend (Core & Strategy)
 *   **Language**: Python 3.10+
 *   **Libraries**:
+    *   `Pydantic Settings`: Centralized, validated environment and config management.
+    *   `Alembic`: Database migrations for reliable schema versioning.
     *   `CCXT`: For exchange connectivity and order execution.
     *   `Pandas` & `NumPy`: For vectorized technical indicator calculations.
     *   `SQLAlchemy`: ORM for configuration and trade history persistence.

@@ -21,7 +21,7 @@ git clone git@github.com:netfirms/nice-trading.git
 cd nice-trading
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ### 3. Environment Config
