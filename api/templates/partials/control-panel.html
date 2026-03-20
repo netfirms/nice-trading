@@ -1,0 +1,37 @@
+<div class="space-y-4">
+    <div class="flex flex-col gap-2">
+        <label class="text-sm text-slate-400">Current Strategy</label>
+        <span class="text-emerald-400 font-mono text-lg font-bold">{{ state.current_strategy.upper() }}</span>
+    </div>
+
+    <div class="flex gap-3">
+        {% if state.is_running %}
+        <button class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-rose-900/20"
+                hx-post="/update" 
+                hx-vals='{"is_running": false}' 
+                hx-target="#control-panel"
+                hx-swap="innerHTML">
+            ⏹️ Stop Bot
+        </button>
+        {% else %}
+        <button class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-900/20"
+                hx-post="/update" 
+                hx-vals='{"is_running": true}' 
+                hx-target="#control-panel"
+                hx-swap="innerHTML">
+            ▶️ Start Bot
+        </button>
+        {% endif %}
+    </div>
+
+    <form hx-post="/update" hx-target="#control-panel" class="pt-4 border-t border-slate-800">
+        <label class="block text-sm text-slate-400 mb-2">Switch Strategy</label>
+        <div class="flex gap-2">
+            <select name="strategy" class="bg-slate-800 border-none rounded-lg flex-1 text-slate-200 px-3">
+                <option value="advanced" {% if state.current_strategy == 'advanced' %}selected{% endif %}>Advanced</option>
+                <option value="sma" {% if state.current_strategy == 'sma' %}selected{% endif %}>SMA Crossover</option>
+            </select>
+            <button type="submit" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg transition">Apply</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,17 @@
+{% for trade in trades %}
+<tr class="border-b border-slate-800/50 hover:bg-slate-800/30 transition">
+    <td class="py-4 text-slate-400 text-sm">{{ trade.timestamp.strftime('%H:%M:%S') }}</td>
+    <td class="py-4">
+        {% if trade.side == 'buy' %}
+        <span class="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Buy</span>
+        {% else %}
+        <span class="bg-rose-500/10 text-rose-400 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Sell</span>
+        {% endif %}
+    </td>
+    <td class="py-4 font-mono font-medium">{{ "%.4f"|format(trade.amount) }}</td>
+    <td class="py-4 font-mono">${{ "%.2f"|format(trade.price) }}</td>
+    <td class="py-4 font-mono {% if trade.pnl > 0 %}text-emerald-400{% elif trade.pnl < 0 %}text-rose-400{% else %}text-slate-500{% endif %}">
+        {{ "%.2f"|format(trade.pnl) }}
+    </td>
+</tr>
+{% endfor %}

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nice Trading Dashboard</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); }
+        .neon-border { border-color: rgba(16, 185, 129, 0.2); transition: all 0.3s ease; }
+        .neon-border:hover { border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
+        .heartbeat { animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        @keyframes ping { 75%, 100% { transform: scale(1.5); opacity: 0; } }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <header class="flex flex-col gap-6 mb-12 border-b border-slate-800/50 pb-10">
+            <div class="flex justify-between items-center w-full">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-4xl font-black tracking-tight text-slate-100 flex items-center gap-3">
+                        <span class="text-emerald-500">NICE</span>TRADING
+                    </h1>
+                    <div class="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                        <span class="relative flex h-2 w-2">
+                            <span class="heartbeat absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span class="text-[10px] font-bold text-emerald-400 tracking-widest uppercase">System Live</span>
+                    </div>
+                    <button hx-post="/bots/stop-all" 
+                            hx-target="#bot-list"
+                            hx-confirm="ARE YOU SURE? This will stop ALL active bots immediately."
+                            class="px-4 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-95">
+                        Emergency Stop All
+                    </button>
+                </div>
+                <div id="status-badge" hx-get="/partials/status-badge" hx-trigger="load, every 5s"></div>
+            </div>
+            
+            <div id="favourites-container" hx-get="/partials/favourites" hx-trigger="load">
+                <!-- Favourites loaded here -->
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Sidebar / Control Panel (4 cols) -->
+            <aside class="lg:col-span-4 space-y-6">
+                <div class="glass p-6 rounded-2xl border border-slate-800 shadow-xl">
+                    <h2 class="text-xl font-semibold mb-6 text-slate-300 flex items-center gap-2">
+                        🤖 Bot Fleet
+                    </h2>
+                    <div id="bot-list-container" hx-get="/partials/bot-list" hx-trigger="load">
+                        <!-- Multi-bot list loaded via HTMX -->
+                    </div>
+                </div>
+
+                <div class="glass p-6 rounded-2xl border border-slate-800 shadow-xl">
+                    <h2 class="text-xl font-semibold mb-4 text-slate-300 text-sm flex items-center gap-2">
+                        📋 Platform Stats
+                    </h2>
+                    <div id="stats-panel" hx-get="/partials/stats" hx-trigger="load, every 10s">
+                        <!-- Stats loaded via HTMX -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content (8 cols) -->
+            <main class="lg:col-span-8 space-y-6">
+                <!-- Interactive Chart -->
+                <div class="glass p-8 rounded-2xl border border-slate-800 shadow-xl h-[500px] relative overflow-hidden">
+                    <div id="chart-container" class="absolute inset-0"></div>
+                </div>
+
+                <div class="glass p-8 rounded-2xl border border-slate-800 shadow-xl min-h-[400px]">
+                    <h2 class="text-2xl font-semibold mb-6 text-slate-300 flex justify-between items-center">
+                        📜 Trade History
+                        <button class="text-sm bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md transition" 
+                                hx-get="/partials/trades" hx-target="#trade-table">
+                            ↻ Refresh
+                        </button>
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-slate-500 border-b border-slate-800">
+                                    <th class="pb-4 font-medium">Time</th>
+                                    <th class="pb-4 font-medium">Type</th>
+                                    <th class="pb-4 font-medium">Amount</th>
+                                    <th class="pb-4 font-medium">Price</th>
+                                    <th class="pb-4 font-medium">PnL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trade-table" hx-get="/partials/trades" hx-trigger="load, every 30s">
+                                <!-- Trades will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const chartContainer = document.getElementById('chart-container');
+        const chart = LightweightCharts.createChart(chartContainer, {
+            layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#94a3b8' },
+            grid: { vertLines: { color: 'rgba(255, 255, 255, 0.05)' }, horzLines: { color: 'rgba(255, 255, 255, 0.05)' } },
+            timeScale: { timeVisible: true, secondsVisible: false },
+        });
+
+        // --- OHLCV Data Hydration ---
+        async function fetchOHLCV(symbol) {
+            try {
+                const response = await fetch(`/api/ohlcv/${symbol.replace('/', '-')}`);
+                if (!response.ok) throw new Error("Failed to fetch data");
+                const data = await response.json();
+                candleSeries.setData(data);
+            } catch (err) {
+                console.error("Error hydrating chart:", err);
+            }
+        }
+
+        // --- WebSocket Integration ---
+        const priceWs = new WebSocket(`ws://${window.location.host}/ws/price`);
+        const logWs = new WebSocket(`ws://${window.location.host}/ws/logs`);
+
+        priceWs.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'price_update') {
+                for (const [symbol, price] of Object.entries(msg.data)) {
+                    // Update price in bot list if element exists
+                    const priceEl = document.getElementById(`price-${symbol.replace('/', '-')}`);
+                    if (priceEl) {
+                        priceEl.innerText = `$${parseFloat(price).toLocaleString()}`;
+                        priceEl.classList.add('text-emerald-400');
+                        setTimeout(() => priceEl.classList.remove('text-emerald-400'), 500);
+                    }
+                }
+            }
+        };
+
+        logWs.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            console.log("LOG:", msg.data);
+            // Optionally append to a log UI component
+        };
+
+        // --- Chart Markers (Signals) ---
+        function addMarker(time, type, price) {
+            const currentMarkers = candleSeries.getMarkers() || [];
+            currentMarkers.push({
+                time: time,
+                position: type === 'buy' ? 'belowBar' : 'aboveBar',
+                color: type === 'buy' ? '#10b981' : '#ef4444',
+                shape: type === 'buy' ? 'arrowUp' : 'arrowDown',
+                text: type.toUpperCase() + ' @ ' + price,
+            });
+            candleSeries.setMarkers(currentMarkers);
+        }
+
+        // --- Initial Load ---
+        fetchOHLCV('BTC/USDT'); // Default asset
+
+        window.addEventListener('resize', () => {
+            chart.resize(chartContainer.clientWidth, chartContainer.clientHeight);
+        });
+    </script>
+</body>
+</html>

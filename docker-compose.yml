@@ -1,0 +1,125 @@
+services:
+  # --- Gateway & Security ---
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - trading-network
+
+  # --- Storage Layer ---
+  redis:
+    image: redis:alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trading-network
+
+  questdb:
+    image: questdb/questdb:latest
+    volumes:
+      - questdb_data:/var/lib/questdb
+    environment:
+      - QDB_TELEMETRY_ENABLED=false
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G 
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider http://localhost:9003/status || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - trading-network
+
+  # --- Application Layer ---
+  api:
+    build: .
+    command: uvicorn api.app:app --host 0.0.0.0 --port 8000
+    volumes:
+      - sqlite_data:/app/data
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      questdb:
+        condition: service_healthy
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - trading-network
+
+  manager:
+    build: .
+    command: python manager/bot_manager.py
+    volumes:
+      - sqlite_data:/app/data
+    env_file: .env
+    depends_on:
+      api:
+        condition: service_started
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - trading-network
+
+  orderbook-worker:
+    build: .
+    command: python workers/orderbook_fetcher.py
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      questdb:
+        condition: service_healthy
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - trading-network
+
+networks:
+  trading-network:
+    driver: bridge
+
+volumes:
+  questdb_data:
+  sqlite_data:
+  redis_data:
+
+# --- Global Logging Policy ---
+logging:
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"

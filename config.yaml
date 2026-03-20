@@ -1,0 +1,19 @@
+exchange:
+  id: binance
+  symbol: BTC/USDT
+  timeframe: 1h
+  dry_run: true
+
+strategy:
+  name: advanced
+  fast_sma: 10
+  slow_sma: 30
+  rsi_window: 14
+
+risk:
+  max_position_size: 0.1
+  stop_loss_pct: 0.05
+
+logging:
+  level: INFO
+  file: logs/trading.log

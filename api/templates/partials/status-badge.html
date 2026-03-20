@@ -1,0 +1,6 @@
+<div class="flex items-center gap-2">
+    <div class="w-2 h-2 rounded-full {% if state.is_running %}bg-emerald-500 animate-pulse{% else %}bg-rose-500{% endif %}"></div>
+    <span class="text-xs font-medium text-slate-400 uppercase tracking-widest">
+        {% if state.is_running %}Live{% else %}Offline{% endif %}
+    </span>
+</div>
