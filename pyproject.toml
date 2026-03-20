@@ -40,6 +40,8 @@ packages = ["api", "manager", "engine", "connectors", "storage", "utils", "worke
 
 [tool.ruff]
 line-length = 100
+
+[tool.ruff.lint]
 select = ["E", "F", "B", "I", "N"]
 ignore = ["E501"]
 
