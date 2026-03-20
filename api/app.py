@@ -5,11 +5,12 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from storage.db import Storage
 from storage.cache import Cache
+from utils.config_handler import settings
 import secrets
 import uvicorn
-import os
 import asyncio
 import json
+from typing import List, Dict, Any, Optional
 
 app = FastAPI(title="Nice Trading Management API")
 templates = Jinja2Templates(directory="api/templates")
@@ -17,9 +18,9 @@ storage = Storage()
 cache = Cache()
 security = HTTPBasic()
 
-def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
-    correct_username = os.getenv("DASHBOARD_USER", "admin")
-    correct_password = os.getenv("DASHBOARD_PASS", "password") # Default for demo
+def get_current_user(credentials: HTTPBasicCredentials = Depends(security)) -> str:
+    correct_username = settings.DASHBOARD_USER
+    correct_password = settings.DASHBOARD_PASS
     is_correct_username = secrets.compare_digest(credentials.username, correct_username)
     is_correct_password = secrets.compare_digest(credentials.password, correct_password)
     if not (is_correct_username and is_correct_password):
@@ -158,9 +159,9 @@ def get_trades_json():
     return storage.get_trades()
 
 @app.get("/api/ohlcv/{symbol}")
-async def get_ohlcv(symbol: str, user: str = Depends(get_current_user)):
+async def get_ohlcv(symbol: str, user: str = Depends(get_current_user)) -> List[Dict[str, Any]]:
     """Fetch historical OHLCV data for chart hydration."""
-    connector = BinanceConnector('binance', os.getenv("BINANCE_API_KEY"), os.getenv("BINANCE_SECRET"))
+    connector = BinanceConnector('binance', settings.BINANCE_API_KEY, settings.BINANCE_SECRET)
     try:
         # In a production app, we would query QuestDB first
         # For now, we fetch from Binance via CCXT

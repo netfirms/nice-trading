@@ -1,8 +1,9 @@
 import time
-import os
 import signal
 import sys
+from typing import Optional, Dict, Any
 from multiprocessing import Process, Event
+from utils.config_handler import settings
 from storage.db import Storage
 from utils.logger import setup_logger
 from utils.decorators import retry_on_failure
@@ -28,8 +29,8 @@ class BotRunner:
         try:
             connector = BinanceConnector(
                 'binance', 
-                os.getenv("BINANCE_API_KEY"), 
-                os.getenv("BINANCE_SECRET")
+                settings.BINANCE_API_KEY, 
+                settings.BINANCE_SECRET
             )
             storage = Storage()
             cache = Cache()
