@@ -1,13 +1,19 @@
+from typing import Tuple, Optional
+from utils.config_handler import settings
+
 class RiskManager:
     """Handles risk validation for orders."""
     
-    def __init__(self, max_position_size_pct: float = 0.1, stop_loss_pct: float = 0.05, max_drawdown_pct: float = 0.05):
+    def __init__(self, 
+                 max_position_size_pct: float = 0.1, 
+                 stop_loss_pct: float = 0.05, 
+                 max_drawdown_pct: float = 0.05):
         self.max_position_size_pct = max_position_size_pct  # Fraction of total balance
         self.stop_loss_pct = stop_loss_pct
         self.max_drawdown_pct = max_drawdown_pct
-        self.initial_balance = None
+        self.initial_balance: Optional[float] = None
 
-    def validate_order(self, signal: str, balance: float, current_price: float) -> tuple[bool, float, str]:
+    def validate_order(self, signal: str, balance: float, current_price: float) -> Tuple[bool, float, str]:
         """
         Validate if the signal meets risk management criteria.
         Returns (is_safe, amount, message).

@@ -48,6 +48,8 @@ class Favourite(Base):
     id = Column(Integer, primary_key=True)
     symbol = Column(String, unique=True, nullable=False)
 
+from utils.config_handler import settings
+
 class Storage:
     def __init__(self, db_url: str = 'sqlite:///data/trading_bot.db'):
         self.engine = create_engine(db_url)
@@ -55,8 +57,8 @@ class Storage:
         self.Session = sessionmaker(bind=self.engine)
         
         # QuestDB Configuration
-        self.quest_host = os.getenv('QUESTDB_HOST', 'localhost')
-        self.quest_port = int(os.getenv('QUESTDB_PORT', 9009))
+        self.quest_host = settings.QUESTDB_HOST
+        self.quest_port = settings.QUESTDB_PORT
 
     def save_tick_questdb(self, symbol, price, amount, side):
         """High-speed ingestion of market ticks using QuestDB ILP."""
