@@ -12,6 +12,7 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
+	github.com/questdb/go-questdb-client/v3 v3.2.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
 )

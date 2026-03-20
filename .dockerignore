@@ -1,0 +1,11 @@
+.env
+.git
+__pycache__
+*.pyc
+logs/
+data/
+*.db
+.gemini
+brain/
+workers/golang/bin/
+orderbook-worker-go

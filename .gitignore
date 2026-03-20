@@ -1,40 +1,36 @@
-# Python
-venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Databases
-*.db
-data/
-questdb_data/
-redis_data/
-
-# Environment
+# --- Secrets & Environment ---
 .env
 
-# Logs
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Go ---
+orderbook-worker-go
+workers/golang/bin/
+
+# --- Databases & Logs ---
+data/
 logs/
+*.db
 *.log
 
-# IDEs
+# --- Docker ---
+.dockerignore
+
+# --- IDEs & System ---
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
 
-# Deployment
-project.tar.gz
+# --- Project Specific ---
+.gemini/
+brain/
+/tmp/simulate_edge_cases.py

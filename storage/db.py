@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from questdb.ingress import IngressError, Sender
@@ -20,7 +20,7 @@ class Trade(Base):
     side = Column(String)  # 'buy' or 'sell'
     amount = Column(Float)
     price = Column(Float)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     pnl = Column(Float, nullable=True)
 
 
