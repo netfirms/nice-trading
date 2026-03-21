@@ -1,5 +1,5 @@
 # --- Stage 1: Build the Go performance component ---
-FROM golang:1.21-alpine AS go-builder
+FROM golang:1.24-alpine AS go-builder
 WORKDIR /build
 COPY workers/golang/go.mod workers/golang/go.sum ./
 RUN go mod download

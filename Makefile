@@ -1,6 +1,26 @@
 # --- Nice Trading Platform Makefile ---
 
-.PHONY: help install build run-api run-go-worker up down logs test clean db-shell
+# Detection logic for Podman/Docker
+SHELL := /bin/zsh
+PATH := /usr/local/bin:$(PATH)
+
+# Use absolute paths if found in /usr/local/bin, otherwise fallback to command -v
+PODMAN := $(shell ls /usr/local/bin/podman 2>/dev/null || command -v podman 2>/dev/null)
+DOCKER := $(shell ls /usr/local/bin/docker 2>/dev/null || command -v docker 2>/dev/null)
+
+ifeq ($(PODMAN),)
+    COMPOSE := docker-compose
+    CONTAINER_ENGINE := docker
+else
+    # If podman is found, prefer podman-compose
+    COMPOSE := $(shell ls /usr/local/bin/podman-compose 2>/dev/null || command -v podman-compose 2>/dev/null)
+    ifeq ($(COMPOSE),)
+        COMPOSE := podman compose
+    endif
+    CONTAINER_ENGINE := podman
+endif
+
+.PHONY: help install build run-api run-go-worker up down logs test clean db-shell podman-init
 
 # Default target: show help
 help:
@@ -12,15 +32,16 @@ help:
 	@echo "  make run-go-worker   Run Go-based orderbook worker"
 	@echo "  make test            Run pytest suite"
 	@echo ""
-	@echo "Docker Orchestration:"
+	@echo "Container Orchestration ($(CONTAINER_ENGINE)):"
 	@echo "  make up              Start all containers (detached)"
 	@echo "  make down            Stop and remove all containers"
-	@echo "  make build           Rebuild Docker images"
+	@echo "  make build           Rebuild images"
 	@echo "  make logs            Follow all container logs"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  make clean           Remove binaries, pyc, and temp files"
 	@echo "  make db-shell        Enter PostgreSQL console"
+	@echo "  make podman-init     (Podman Only) Start the podman machine"
 
 # --- Local Development ---
 
@@ -37,19 +58,27 @@ run-go-worker:
 test:
 	pytest tests/
 
-# --- Docker ---
+# --- Container Management ---
 
 up:
-	docker-compose up -d
+	$(COMPOSE) up -d
 
 down:
-	docker-compose down
+	$(COMPOSE) down
 
 build:
-	docker-compose build
+	$(COMPOSE) build
 
 logs:
-	docker-compose logs -f
+	$(COMPOSE) logs -f
+
+podman-init:
+	@if [ -n "$(PODMAN)" ]; then \
+		echo "🚀 Starting Podman machine..."; \
+		podman machine start || echo "⚠️ Podman machine might already be running or needs 'podman machine init'"; \
+	else \
+		echo "❌ Podman not found on this system."; \
+	fi
 
 # --- Utility ---
 
@@ -60,4 +89,4 @@ clean:
 	@echo "✨ Workspace cleaned."
 
 db-shell:
-	docker-compose exec postgres psql -U postgres -d trading_bot
+	$(COMPOSE) exec postgres psql -U postgres -d trading_bot
